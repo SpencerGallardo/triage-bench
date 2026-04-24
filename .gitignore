@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# API keys — never commit
+.env
+*.env
+
+# Eval results — regenerable, often large, sometimes contain customer-like data
+# Comment these out if you want to commit a reference run
+results/latest/
+results/smoke/
+results/with_judge/
+results/tool_use/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Claude Code project settings and memory
+.claude/
