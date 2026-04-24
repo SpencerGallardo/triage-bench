@@ -1,0 +1,88 @@
+{
+  "model": "claude-sonnet-4-20250514",
+  "judge_model": "claude-sonnet-4-20250514",
+  "strategies": {
+    "zero_shot": {
+      "n_cases": 40,
+      "classification_accuracy": 0.775,
+      "escalation_accuracy": 0.9,
+      "completeness_mean": 0.5791666666666666,
+      "no_hallucination_rate": 0.925,
+      "parse_success_rate": 1.0,
+      "tone_score_mean": 0.8887499999999994,
+      "quality_score_mean": 0.8162500000000001,
+      "composite_mean": 0.8524791666666667,
+      "total_cost_usd": 0.1401,
+      "avg_latency_ms": 4726,
+      "total_input_tokens": 13899,
+      "total_output_tokens": 6561
+    },
+    "few_shot": {
+      "n_cases": 40,
+      "classification_accuracy": 0.8,
+      "escalation_accuracy": 0.925,
+      "completeness_mean": 0.5562500000000001,
+      "no_hallucination_rate": 0.9,
+      "parse_success_rate": 1.0,
+      "tone_score_mean": 0.8849999999999995,
+      "quality_score_mean": 0.7975000000000001,
+      "composite_mean": 0.8546250000000001,
+      "total_cost_usd": 0.161,
+      "avg_latency_ms": 4827,
+      "total_input_tokens": 28299,
+      "total_output_tokens": 5073
+    },
+    "chain_of_thought": {
+      "n_cases": 40,
+      "classification_accuracy": 0.8,
+      "escalation_accuracy": 0.875,
+      "completeness_mean": 0.6354166666666666,
+      "no_hallucination_rate": 0.9,
+      "parse_success_rate": 1.0,
+      "tone_score_mean": 0.8624999999999995,
+      "quality_score_mean": 0.80625,
+      "composite_mean": 0.8466666666666667,
+      "total_cost_usd": 0.1776,
+      "avg_latency_ms": 5451,
+      "total_input_tokens": 20859,
+      "total_output_tokens": 7668
+    },
+    "structured": {
+      "n_cases": 40,
+      "classification_accuracy": 0.8,
+      "escalation_accuracy": 0.9,
+      "completeness_mean": 0.6166666666666668,
+      "no_hallucination_rate": 0.875,
+      "parse_success_rate": 1.0,
+      "tone_score_mean": 0.8787499999999996,
+      "quality_score_mean": 0.8362499999999999,
+      "composite_mean": 0.8472291666666665,
+      "total_cost_usd": 0.1902,
+      "avg_latency_ms": 5289,
+      "total_input_tokens": 26499,
+      "total_output_tokens": 7383
+    },
+    "user_custom": {
+      "n_cases": 40,
+      "classification_accuracy": 0.725,
+      "escalation_accuracy": 0.875,
+      "completeness_mean": 0.6520833333333335,
+      "no_hallucination_rate": 0.9,
+      "parse_success_rate": 1.0,
+      "tone_score_mean": 0.8549999999999995,
+      "quality_score_mean": 0.8012500000000002,
+      "composite_mean": 0.8322083333333333,
+      "total_cost_usd": 0.1068,
+      "avg_latency_ms": 4357,
+      "total_input_tokens": 6699,
+      "total_output_tokens": 5783
+    }
+  },
+  "ranking_by_composite": [
+    "few_shot",
+    "zero_shot",
+    "structured",
+    "chain_of_thought",
+    "user_custom"
+  ]
+}
