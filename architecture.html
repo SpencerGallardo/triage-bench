@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Triage Bench — Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f4f1ea;
+    --paper-2: #ebe6db;
+    --ink: #1a1a1a;
+    --ink-dim: #5c5c5c;
+    --ink-faint: #9a9589;
+    --rule: #2a2a2a;
+    --accent: #b8491c;
+    --accent-dim: #d4a88a;
+    --good: #4a7c3a;
+    --judge: #6b4e8f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Fraunces', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 3rem 2rem 5rem;
+    line-height: 1.5;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(184,73,28,0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(107,78,143,0.03) 0%, transparent 40%);
+  }
+
+  .page {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  /* ---- Header ---- */
+  header {
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: 1.5rem 0 1.25rem;
+    margin-bottom: 3rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 2rem;
+  }
+  header .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 0.75rem;
+  }
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 2.4rem;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  header h1 em {
+    font-style: normal;
+    font-weight: 600;
+  }
+  header .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--ink-dim);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* ---- Legend ---- */
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--ink-dim);
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px dashed var(--ink-faint);
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.5rem; }
+  .legend-swatch {
+    width: 14px; height: 14px;
+    border: 1px solid var(--ink);
+  }
+
+  /* ---- Diagram ---- */
+  .diagram {
+    position: relative;
+    padding: 1rem 0;
+  }
+
+  .row {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .row-label {
+    position: absolute;
+    left: -2rem;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: left center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  .box {
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    padding: 1rem 1.1rem;
+    position: relative;
+    transition: transform 0.2s ease;
+  }
+  .box:hover { transform: translateY(-2px); }
+
+  .box .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 0.35rem;
+  }
+  .box .title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 0.3rem;
+  }
+  .box .desc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--ink-dim);
+    line-height: 1.5;
+  }
+  .box .file {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--ink-faint);
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dotted var(--ink-faint);
+  }
+
+  .box.accent { border-color: var(--accent); border-width: 2px; }
+  .box.accent .label { color: var(--accent); }
+  .box.judge { border-color: var(--judge); border-style: dashed; }
+  .box.judge .label { color: var(--judge); }
+  .box.stretch { border-style: dashed; opacity: 0.9; }
+  .box.output {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .box.output .label { color: var(--accent-dim); }
+  .box.output .desc { color: var(--paper-2); }
+  .box.output .file { color: var(--ink-faint); border-top-color: #3a3a3a; }
+
+  /* ---- Arrows ---- */
+  .flow {
+    position: relative;
+    height: 2rem;
+    margin: -1rem 0;
+  }
+  .flow::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0; bottom: 0;
+    width: 1.5px;
+    background: var(--ink);
+  }
+  .flow::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid var(--ink);
+    transform: translateX(-50%);
+  }
+  .flow.multi {
+    height: 3rem;
+  }
+  .flow-label {
+    position: absolute;
+    left: calc(50% + 0.75rem);
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--ink-dim);
+    background: var(--paper);
+    padding: 0 0.4rem;
+    white-space: nowrap;
+  }
+
+  /* ---- Specific rows ---- */
+  .row-dataset { grid-template-columns: 1fr; }
+  .row-strategies { grid-template-columns: repeat(4, 1fr); }
+  .row-api { grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+  .row-pipeline { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .row-scoring { grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+  .row-output { grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  /* Fan-out visualization for strategies */
+  .fan-wrapper {
+    position: relative;
+    padding-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .fan-svg {
+    width: 100%;
+    height: 50px;
+    display: block;
+    margin-bottom: -1rem;
+  }
+
+  /* Inline metric list */
+  .metrics-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+  }
+  .metric-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.35rem 0.55rem;
+    background: var(--paper-2);
+    border-left: 2px solid var(--ink);
+    line-height: 1.3;
+  }
+  .metric-chip strong { color: var(--accent); font-weight: 600; }
+  .metric-chip.judged { border-left-color: var(--judge); }
+  .metric-chip.judged strong { color: var(--judge); }
+
+  /* Dimensions pane */
+  .dims-pane {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Side annotations */
+  .annotation {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--ink-dim);
+    padding: 0.75rem 1rem;
+    border-left: 2px solid var(--accent);
+    background: rgba(184,73,28,0.04);
+    margin: 1rem 0;
+  }
+  .annotation::before {
+    content: '※ ';
+    color: var(--accent);
+    font-style: normal;
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--ink);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+  footer h3 {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+  footer code {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* Numbers running down the side */
+  .step-num {
+    position: absolute;
+    left: -3.5rem;
+    top: 1rem;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.8rem;
+    color: var(--ink-faint);
+    font-weight: 400;
+  }
+
+  @media (max-width: 900px) {
+    .row-strategies { grid-template-columns: repeat(2, 1fr); }
+    .row-api, .row-pipeline, .row-scoring, .row-output { grid-template-columns: 1fr; }
+    .step-num, .row-label { display: none; }
+    body { padding: 2rem 1.25rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class=page>
+
+  <header>
+    <div>
+      <div class=eyebrow>Technical Architecture · Systems Diagram</div>
+      <h1>Triage Bench <em>&nbsp;/&nbsp;</em> <span>end-to-end pipeline</span></h1>
+    </div>
+    <div class=meta>
+      ~1,200 LOC python<br>
+      43 unit tests<br>
+      40 cases × 4 strategies<br>
+      six scoring dimensions
+    </div>
+  </header>
+
+  <div class=legend>
+    <div class=legend-item><span class=legend-swatch style="background:var(--paper);border-color:var(--ink)"></span>core component</div>
+    <div class=legend-item><span class=legend-swatch style="background:var(--paper);border-color:var(--accent);border-width:2px"></span>claude api call</div>
+    <div class=legend-item><span class=legend-swatch style="background:var(--paper);border-color:var(--judge);border-style:dashed"></span>llm-as-judge (stretch)</div>
+    <div class=legend-item><span class=legend-swatch style="background:var(--paper);border-color:var(--ink);border-style:dashed"></span>stretch variant</div>
+    <div class=legend-item><span class=legend-swatch style="background:var(--ink);border-color:var(--ink)"></span>artifact / output</div>
+  </div>
+
+  <div class=diagram>
+
+    <!-- ROW 1: Dataset -->
+    <div class="row row-dataset" style="position:relative">
+      <div class=step-num>i</div>
+      <div class=row-label>Input</div>
+      <div class=box>
+        <div class=label>01 · Test dataset</div>
+        <div class=title>40 hand-crafted support tickets</div>
+        <div class=desc>
+          Billing · Technical · Feature requests · Account access · Escalation<br>
+          Includes seeded hallucination traps, a prompt injection case, emotionally-loaded tickets, and regulatory edge cases (GDPR / HIPAA / media inquiries).
+        </div>
+        <div class=file>data/test_cases.json &nbsp;·&nbsp; each case has: expected_category, expected_escalate, expected_tone, must_mention[], must_not_hallucinate[]</div>
+      </div>
+    </div>
+
+    <div class=flow><span class=flow-label>for each case × strategy</span></div>
+
+    <!-- ROW 2: Strategies (fan-out) -->
+    <div class="row row-strategies" style="position:relative">
+      <div class=step-num>ii</div>
+      <div class=row-label>Prompting</div>
+
+      <div class=box>
+        <div class=label>02a · Zero-shot</div>
+        <div class=title>Minimal baseline</div>
+        <div class=desc>Role + product + output schema. Nothing else.</div>
+        <div class=file>strategies.py</div>
+      </div>
+      <div class=box>
+        <div class=label>02b · Few-shot</div>
+        <div class=title>3 anchor examples</div>
+        <div class=desc>Billing, account access, plan questions. Verified no leakage into test set.</div>
+        <div class=file>strategies.py</div>
+      </div>
+      <div class=box>
+        <div class=label>02c · Chain-of-thought</div>
+        <div class=title>Explicit reasoning steps</div>
+        <div class=desc>Five-step deliberation before response. Tests reasoning on ambiguous cases.</div>
+        <div class=file>strategies.py</div>
+      </div>
+      <div class=box>
+        <div class=label>02d · Structured</div>
+        <div class=title>Production-style prompt</div>
+        <div class=desc>Senior-specialist role, anti-hallucination constraints, escalation rubric.</div>
+        <div class=file>strategies.py</div>
+      </div>
+    </div>
+
+    <div class=annotation>
+      All four strategies share identical product context — performance differences reflect prompting approach, not product knowledge asymmetry.
+    </div>
+
+    <div class=flow><span class=flow-label>(system, user) tuple</span></div>
+
+    <!-- ROW 3: API call with tool-use variant -->
+    <div class="row row-api" style="position:relative">
+      <div class=step-num>iii</div>
+      <div class=row-label>Execution</div>
+
+      <div class="box accent">
+        <div class=label>03 · Claude API call</div>
+        <div class=title>Thin wrapper around the Anthropic SDK</div>
+        <div class=desc>
+          Timed with <code>time.perf_counter()</code>. Token usage captured from response. Cost computed against a per-model pricing table. Robust JSON extraction handles plain, fenced, and preamble-wrapped outputs.
+        </div>
+        <div class=file>client.py &nbsp;·&nbsp; returns CallResult(raw_text, parsed, latency_ms, cost_usd, input_tokens, output_tokens)</div>
+      </div>
+
+      <div class="box stretch">
+        <div class=label>03′ · Tool-use variant</div>
+        <div class=title>Schema-enforced output</div>
+        <div class=desc>Parallel pipeline using the tool_use API. Tests whether schema constraints eliminate parse failures without hurting response quality.</div>
+        <div class=file>run_tool_use_eval.py · stretch goal</div>
+      </div>
+    </div>
+
+    <div class=flow><span class=flow-label>parsed JSON response</span></div>
+
+    <!-- ROW 4: Scoring -->
+    <div class="row row-scoring" style="position:relative">
+      <div class=step-num>iv</div>
+      <div class=row-label>Scoring</div>
+
+      <div class=box>
+        <div class=label>04a · Rule-based scorers</div>
+        <div class=title>Deterministic, fast, free</div>
+        <div class=desc>
+          Run on every case. Zero API cost, millisecond latency, same answer every time.
+        </div>
+        <div class=metrics-list>
+          <div class=metric-chip><strong>classification</strong><br>enum match</div>
+          <div class=metric-chip><strong>escalation</strong><br>boolean match</div>
+          <div class=metric-chip><strong>completeness</strong><br>must_mention coverage</div>
+          <div class=metric-chip><strong>no-hallucination</strong><br>must_not pattern check</div>
+          <div class=metric-chip><strong>parse</strong><br>valid JSON?</div>
+          <div class=metric-chip><strong>cost / latency</strong><br>passed through</div>
+        </div>
+        <div class=file>evaluators.py</div>
+      </div>
+
+      <div class="box judge">
+        <div class=label>04b · Llm-as-judge</div>
+        <div class=title>Second Claude call<br><span style="font-weight:400;font-size:0.95rem;font-style:italic;color:var(--ink-dim)">stretch goal</span></div>
+        <div class=desc>Separate model call with isolated prompt. Rates tone and quality where rules can't reach.</div>
+        <div class=metrics-list style="grid-template-columns:1fr">
+          <div class="metric-chip judged"><strong>tone_score</strong> · 0-1 fit vs. expected_tone</div>
+          <div class="metric-chip judged"><strong>quality_score</strong> · 0-1 overall response quality</div>
+        </div>
+        <div class=file>evaluators.py → judge_response()</div>
+      </div>
+    </div>
+
+    <div class=flow multi>
+      <span class=flow-label>CaseScore objects × 160 (+ 160 judge calls if enabled)</span>
+    </div>
+
+    <!-- ROW 5: Aggregation -->
+    <div class="row row-pipeline" style="position:relative">
+      <div class=step-num>v</div>
+      <div class=row-label>Aggregation</div>
+
+      <div class=box>
+        <div class=label>05 · Composite score</div>
+        <div class=title>Weighted by business impact</div>
+        <div class=desc style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;line-height:1.8">
+          0.25 × escalation<br>
+          0.25 × no_hallucination<br>
+          0.20 × classification<br>
+          0.15 × tone<br>
+          0.10 × completeness<br>
+          0.05 × parse_success
+        </div>
+        <div class=file>evaluators.py → CaseScore.composite</div>
+      </div>
+
+      <div class=box>
+        <div class=label>06 · Per-strategy rollup</div>
+        <div class=title>Means, totals, rankings</div>
+        <div class=desc>
+          Aggregates by strategy: accuracy rates, avg latency, total cost, tokens consumed, composite mean. Ranking sorted by composite.
+        </div>
+        <div class=file>run_eval.py → aggregate_results()</div>
+      </div>
+    </div>
+
+    <div class=flow><span class=flow-label>three JSON artifacts + one HTML report</span></div>
+
+    <!-- ROW 6: Outputs -->
+    <div class="row row-output" style="position:relative">
+      <div class=step-num>vi</div>
+      <div class=row-label>Reporting</div>
+
+      <div class="box output">
+        <div class=label>07a · Structured results</div>
+        <div class=title>Machine-readable artifacts</div>
+        <div class=desc>
+          Every score, every raw response, every summary preserved. Enables diffing across runs when models upgrade or prompts change.
+        </div>
+        <div class=file>results/*/scores.json &nbsp;·&nbsp; raw_outputs.json &nbsp;·&nbsp; summary.json</div>
+      </div>
+
+      <div class="box output">
+        <div class=label>07b · Html dashboard</div>
+        <div class=title>Self-contained report</div>
+        <div class=desc>
+          Inline SVG charts, no external assets. Per-case drill-down shows exactly where each strategy wins or loses. GitHub-Pages-ready.
+        </div>
+        <div class=file>results/*/report.html &nbsp;·&nbsp; generate_report.py</div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div>
+      <h3>Design rationale</h3>
+      Rule-based scorers run always — they're free and deterministic. The judge is additive, for what rules can't catch. Composite weighting reflects real operational cost: a missed escalation or a hallucinated feature is a customer-facing incident; a wrong category is a routing nuisance.
+    </div>
+    <div>
+      <h3>What's swappable</h3>
+      The dataset (drop in real tickets via <code>--test-cases</code>). The model (<code>--model</code>, 8 variants pre-priced). The judge (<code>--judge-model</code> — use a stronger model to reduce self-agreement bias). The strategies (add a function to <code>STRATEGIES</code>).
+    </div>
+    <div>
+      <h3>Runtime · Cost</h3>
+      Full eval: 160 API calls, ~3 minutes, ~$0.40 on Sonnet 4.<br>
+      With judge: ~320 calls, ~$0.80.<br>
+      Tests: 43/43, 2 seconds, no API calls.
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>
