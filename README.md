@@ -2,6 +2,11 @@
 
 **An evaluation framework for Claude on customer support ticket routing.**
 
+**Live links:**
+- [Interactive demo](https://spencergallardo.github.io/triage-bench/demo.html) — try it with real test cases
+- [Results dashboard](https://spencergallardo.github.io/triage-bench/results/reference/report.html) — full findings from a 40-case run
+- [Architecture diagram](https://spencergallardo.github.io/triage-bench/architecture.html) — end-to-end pipeline
+
 A systematic way to measure Claude's performance on customer support ticket routing and response generation — the kind of use case digital-native SaaS companies build on top of the Claude API every day.
 
 This project was built as an artifact for an Applied AI Engineer application at Anthropic. It's designed to answer a concrete customer-engineering question:
